@@ -233,7 +233,7 @@ export function DynamicForm({ isGenerating }: DynamicFormProps) {
       {/* Dynamic product fields grid */}
 
       {/* stepper component */}
-      <div className="">
+      {/* <div className="">
         <div className="flex items-start gap-8 pb-4">
           {steps.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
@@ -253,176 +253,70 @@ export function DynamicForm({ isGenerating }: DynamicFormProps) {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
-      {step === 0 && (
-        <>
-          <CategorySelector
-            selected={category}
-            onSelect={(newCategory) => setCategory(newCategory)}
-          />
-          <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
-            {category.fields.map((fieldConfig) => (
-              <FormField
-                key={fieldConfig.id}
-                control={form.control}
-                name={fieldConfig.id as `dynamicFields.${string}`}
-                render={({ field }) => (
-                  <FormItem
-                    className={cn(
-                      (fieldConfig.type === "textarea" ||
-                        fieldConfig.type === "multi-select") &&
-                        "md:col-span-2",
-                    )}
-                  >
-                    <FormLabel>
-                      {fieldConfig.label}
-                      {fieldConfig.required && (
-                        <span className="ml-0.5 text-destructive">*</span>
-                      )}
-                    </FormLabel>
-                    <FormControl>
-                      {fieldConfig.type === "text" ? (
-                        <Input
-                          placeholder={fieldConfig.placeholder}
-                          {...field}
-                          value={field.value}
-                          className="bg-transparent border-primary"
-                        />
-                      ) : fieldConfig.type === "textarea" ? (
-                        <Textarea
-                          placeholder={fieldConfig.placeholder}
-                          className="min-h-[80px] bg-transparent border-primary resize-none"
-                          {...field}
-                          value={field.value}
-                        />
-                      ) : fieldConfig.type === "select" ? (
-                        <SearchableSelect
-                          options={fieldConfig.options || []}
-                          value={field.value || ""}
-                          onChange={field.onChange}
-                          placeholder={`Select ${fieldConfig.label.toLowerCase()}`}
-                          label={fieldConfig.label}
-                        />
-                      ) : fieldConfig.type === "multi-select" ? (
-                        <MultiSelectControl
-                          options={fieldConfig.options || []}
-                          value={(field.value || []) as string[]}
-                          onChange={field.onChange}
-                        />
-                      ) : null}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+      <CategorySelector
+        selected={category}
+        onSelect={(newCategory) => setCategory(newCategory)}
+      />
+      <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
+        {category.fields.map((fieldConfig) => (
+          <FormField
+            key={fieldConfig.id}
+            control={form.control}
+            name={fieldConfig.id as `dynamicFields.${string}`}
+            render={({ field }) => (
+              <FormItem
+                className={cn(
+                  (fieldConfig.type === "textarea" ||
+                    fieldConfig.type === "multi-select") &&
+                    "md:col-span-2",
                 )}
-              />
-            ))}
-          </div>
-          <Button
-            onClick={() => setStep(1)}
-            variant="link"
-            className="w-full underline"
-          >
-            Next <ArrowRight className="w-4 h-4" />
-          </Button>
-        </>
-      )}
-
-      {step === 1 && (
-        <div className="mt-6 flex flex-col gap-5 border-t border-border pt-6">
-          {/* <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="tone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Writing Tone{" "}
+              >
+                <FormLabel>
+                  {fieldConfig.label}
+                  {fieldConfig.required && (
                     <span className="ml-0.5 text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <SearchableSelect
-                      options={[...TONES]}
-                      value={field.value as string}
-                      onChange={field.onChange}
-                      placeholder="Select tone"
-                      label="Writing Tone"
+                  )}
+                </FormLabel>
+                <FormControl>
+                  {fieldConfig.type === "text" ? (
+                    <Input
+                      placeholder={fieldConfig.placeholder}
+                      {...field}
+                      value={field.value}
+                      className="bg-transparent border-primary"
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="wordCount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Word Count{" "}
-                    <span className="ml-0.5 text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <SearchableSelect
-                      options={[...WORD_COUNTS]}
-                      value={field.value as string}
-                      onChange={field.onChange}
-                      placeholder="Select word count"
-                      label="Word Count"
+                  ) : fieldConfig.type === "textarea" ? (
+                    <Textarea
+                      placeholder={fieldConfig.placeholder}
+                      className="min-h-[80px] bg-transparent border-primary resize-none"
+                      {...field}
+                      value={field.value}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div> */}
-
-          <h1>Second page</h1>
-
-          {/* <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2"> */}
-          {/* Generate Description -- requires full form (product + tone) */}
-          {/* <Button
-            type="submit"
-            size="lg"
-            className="gap-2"
-            disabled={isGenerating || !form.formState.isValid}
-          >
-            {isGenerating ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                Generate Description
-              </>
+                  ) : fieldConfig.type === "select" ? (
+                    <SearchableSelect
+                      options={fieldConfig.options || []}
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder={`Select ${fieldConfig.label.toLowerCase()}`}
+                      label={fieldConfig.label}
+                    />
+                  ) : fieldConfig.type === "multi-select" ? (
+                    <MultiSelectControl
+                      options={fieldConfig.options || []}
+                      value={(field.value || []) as string[]}
+                      onChange={field.onChange}
+                    />
+                  ) : null}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </Button> */}
-
-          {/* Generate Flyer -- only requires product fields */}
-          {/* <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="gap-2"
-            disabled={!productFieldsValid}
-            onClick={() => {}}
-          >
-            <FileImage className="h-4 w-4" />
-            Generate Flyer
-          </Button> */}
-          {/* </div> */}
-          <Button
-            onClick={() => setStep(0)}
-            variant="link"
-            className="w-full underline"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </Button>
-        </div>
-      )}
+          />
+        ))}
+      </div>
+      
     </>
   );
 }

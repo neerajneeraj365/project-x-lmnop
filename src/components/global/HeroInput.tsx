@@ -21,7 +21,13 @@ import { ArrowUp, Plus, Link, PenLine, FileSpreadsheet } from "lucide-react";
 import { motion } from "motion/react";
 import ManualEntryFields from "./ManualEntry";
 import { useForm, FormProvider, Resolver } from "react-hook-form";
-import { UrlFormType, urlSchema } from "@/schema/input-schema";
+import {
+  ParentFormType,
+  parentSchema,
+  getParentDefaultValues,
+  UrlFormType,
+  urlSchema,
+} from "@/schema/input-schema";
 import {
   FormField,
   FormItem,
@@ -33,41 +39,62 @@ import { toast } from "sonner";
 import { CATEGORIES } from "@/lib/category-config";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { scrapeProductUrl } from "@/actions/scrape-product-url";
+import { generateMarketingKit } from "@/actions/generate-marketing-kit";
+import { Badge } from "../ui/badge";
 
 type InputMode = "url" | "manual" | "csv";
 
 export default function HeroInput() {
-  const form = useForm<UrlFormType>({
-    resolver: zodResolver(urlSchema),
-    defaultValues: { url: "" },
+  // const form = useForm<UrlFormType>({
+  //   resolver: zodResolver(urlSchema),
+  //   defaultValues: { url: "" },
+  //   mode: "onChange",
+  // });
+  const form = useForm<ParentFormType>({
+    resolver: zodResolver(parentSchema) as Resolver<ParentFormType>,
+    defaultValues: getParentDefaultValues(CATEGORIES[0].id),
     mode: "onChange",
   });
-  const [inputMode, setInputMode] = useState<InputMode>("manual");
+  const [inputMode, setInputMode] = useState<InputMode>("url");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [csvFile, setCsvFile] = useState<File | null>(null);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (values: UrlFormType) => {
+    mutationFn: async (values: UrlFormType) => {
       if (inputMode === "url") {
-        return fetch("/api/products", {
-          method: "POST",
-          body: JSON.stringify(values.url),
+        const result = await scrapeProductUrl(values.url);
+        if (!result.success) {
+          toast.error(result.error ?? "Failed to scrape URL");
+          return;
+        }
+        const p = result.product;
+        form.reset({
+          ...getParentDefaultValues(form.getValues("categoryId")),
+          url: values.url,
+          name: p.name,
+          description: p.description,
+          price: p.price,
+          brand: p.brand,
         });
+        setInputMode("manual");
+        toast.success(
+          "Product loaded. Review and submit to generate your kit.",
+        );
+        return;
       } else if (inputMode === "manual") {
-        return fetch("/api/products", {
-          method: "POST",
-          body: JSON.stringify(values),
-        });
+        const payload = form.getValues();
+        const result = await generateMarketingKit(payload);
+        if (!result.success) {
+          toast.error(result.error ?? "Failed to start generation");
+          return;
+        }
+        toast.success("Marketing kit generation started.");
+        return;
       } else if (inputMode === "csv") {
-        return fetch("/api/products", {
-          method: "POST",
-          body: JSON.stringify(values),
-        });
+        toast.error("CSV input mode not implemented");
+        return;
       }
-      return Promise.resolve(new Response("Not implemented"));
-    },
-    onSuccess: () => {
-      toast.success("Product added successfully");
     },
     onError: () => {
       toast.error("Failed to add product");
@@ -91,7 +118,7 @@ export default function HeroInput() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.3 }}
-      className="w-full max-w-2xl mx-auto"
+      className="w-full max-w-2xl mx-auto py-6"
     >
       <div className="relative backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-2 shadow-2xl shadow-black/40">
         <FormProvider {...form}>
@@ -109,7 +136,6 @@ export default function HeroInput() {
               mutate({ url: values.url });
             })}
           >
-            {inputMode === "manual" && <ManualEntryFields />}
             {inputMode === "url" && (
               <FormField
                 control={form.control}
@@ -135,6 +161,7 @@ export default function HeroInput() {
                 )}
               />
             )}
+            {inputMode === "manual" && <ManualEntryFields />}
             {inputMode === "csv" && (
               <motion.div
                 className="py-4 px-2 space-y-3"
@@ -200,16 +227,19 @@ export default function HeroInput() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="url">
+                    <span className="flex items-center gap-2">
+                      <Link className="h-3 w-3" />
+                      URL{" "}
+                      <Badge variant="outline" className="text-[8px]">
+                        Beta
+                      </Badge>
+                    </span>
+                  </SelectItem>
                   <SelectItem value="manual">
                     <span className="flex items-center gap-2">
                       <PenLine className="h-3 w-3" />
                       Manual
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="url">
-                    <span className="flex items-center gap-2">
-                      <Link className="h-3 w-3" />
-                      URL
                     </span>
                   </SelectItem>
                   <SelectItem value="csv">

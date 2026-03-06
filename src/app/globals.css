@@ -120,6 +120,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE / old Edge */
+  }
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
   body {
     @apply bg-background text-foreground;
   }

@@ -23,5 +23,30 @@ export function buildProductSchema(fields: CategoryConfig["fields"]) {
   return z.object(shape);
 }
 
+export const parentSchema = z.object({
+  url: z.string().default(""),
+  name: z.string().default(""),
+  description: z.string().default(""),
+  price: z.string().default(""),
+  brand: z.string().default(""),
+  categoryId: z.string().default("fashion"),
+  dynamicFields: z
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
+    .default({}),
+});
+
+export type ParentFormType = z.infer<typeof parentSchema>;
+
+export function getParentDefaultValues(categoryId: string): ParentFormType {
+  return {
+    url: "",
+    name: "",
+    description: "",
+    price: "",
+    brand: "",
+    categoryId,
+    dynamicFields: {},
+  };
+}
 
 export type UrlFormType = z.infer<typeof urlSchema>;
