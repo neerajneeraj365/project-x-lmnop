@@ -1,13 +1,12 @@
-"use client";
+import { auth } from "@clerk/nextjs/server";
+import SignedOutHome from "@/components/global/SignedOutHome";
+import SignedInHome from "@/components/global/SignedInHome";
 
-import { Button } from "@/components/ui/button";
-import { testFunction } from "../../../actions/test-function";
-
-export default function Home() {
-  return (
-    <div>
-      <h1>Hello World</h1>
-      <Button onClick={testFunction}>Test Function</Button>
-    </div>
-  );
+export default async function Home() {
+  const { userId } = await auth();
+  if (userId) {
+    return <SignedInHome />;
+  } else {
+    return <SignedOutHome />;
+  }
 }
